@@ -633,6 +633,19 @@ public class WsAttributeDef implements Comparable<WsAttributeDef>, ChangeToVersi
       this.multiValued = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isMultiValued());
       this.valueType = attributeDef.getValueTypeDb();
 
+      this.assignToAttributeDef = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToAttributeDef());
+      this.assignToAttributeDefAssignment = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToAttributeDefAssn());
+      this.assignToEffectiveMembership = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToEffMembership());
+      this.assignToEffectiveMembershipAssignment = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToEffMembershipAssn());
+      this.assignToGroup = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToGroup());
+      this.assignToGroupAssignment = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToGroupAssn());
+      this.assignToImmediateMembership = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToImmMembership());
+      this.assignToImmediateMembershipAssignment = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToImmMembershipAssn());
+      this.assignToMember = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToMember());
+      this.assignToMemberAssignment = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToMemberAssn());
+      this.assignToStem = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToStem());
+      this.assignToStemAssignment = GrouperServiceUtils.booleanToStringOneChar(attributeDef.isAssignToStemAssn());
+
       //if greater then 2.2 then set id index
       if (GrouperWsVersionUtils.retrieveCurrentClientVersion()
           .greaterOrEqualToArg(GrouperVersion.valueOfIgnoreCase("v2_2_000"))) {

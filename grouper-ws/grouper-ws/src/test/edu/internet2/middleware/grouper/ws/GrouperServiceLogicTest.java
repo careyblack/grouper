@@ -10129,6 +10129,77 @@ public class GrouperServiceLogicTest extends GrouperTest {
   }
 
   /**
+   * GRP-7237: attributeDefSave and findAttributeDefs should return the assignTo flags of the attribute def
+   */
+  public void testAttributeDefSaveAssignToFlags() {
+
+    GrouperServiceUtils.testSession = GrouperSession.startRootSession();
+
+    new StemSave(GrouperServiceUtils.testSession).assignName("test1").save();
+
+    //insert as assign to stem
+    WsAttributeDef wsAttributeDef = new WsAttributeDef();
+    wsAttributeDef.setName("test1:attributeDefAssignTo");
+    wsAttributeDef.setAttributeDefType("attr");
+    wsAttributeDef.setMultiAssignable("F");
+    wsAttributeDef.setMultiValued("F");
+    wsAttributeDef.setValueType("string");
+    wsAttributeDef.setAssignToStem("T");
+
+    WsAttributeDefToSave wsAttributeDefToSave = new WsAttributeDefToSave();
+    wsAttributeDefToSave.setWsAttributeDef(wsAttributeDef);
+
+    WsAttributeDefSaveResults wsAttributeDefSaveResults = GrouperServiceLogic.attributeDefSave(GROUPER_VERSION,
+        new WsAttributeDefToSave[] { wsAttributeDefToSave }, null, null, null);
+
+    assertEquals(wsAttributeDefSaveResults.getResultMetadata().getResultMessage(),
+        WsAttributeDefSaveResultsCode.SUCCESS.name(),
+        wsAttributeDefSaveResults.getResultMetadata().getResultCode());
+    assertEquals("SUCCESS_INSERTED", wsAttributeDefSaveResults.getResults()[0].getResultMetadata().getResultCode());
+
+    WsAttributeDef resultWsAttributeDef = wsAttributeDefSaveResults.getResults()[0].getWsAttributeDef();
+    assertEquals("T", resultWsAttributeDef.getAssignToStem());
+    assertEquals("F", resultWsAttributeDef.getAssignToGroup());
+
+    //update to assign to group as well
+    wsAttributeDef.setAssignToGroup("T");
+
+    wsAttributeDefSaveResults = GrouperServiceLogic.attributeDefSave(GROUPER_VERSION,
+        new WsAttributeDefToSave[] { wsAttributeDefToSave }, null, null, null);
+
+    assertEquals("SUCCESS_UPDATED", wsAttributeDefSaveResults.getResults()[0].getResultMetadata().getResultCode());
+
+    resultWsAttributeDef = wsAttributeDefSaveResults.getResults()[0].getWsAttributeDef();
+    assertEquals("T", resultWsAttributeDef.getAssignToStem());
+    assertEquals("T", resultWsAttributeDef.getAssignToGroup());
+    assertEquals("F", resultWsAttributeDef.getAssignToMember());
+
+    AttributeDef attributeDef = AttributeDefFinder.findByName("test1:attributeDefAssignTo", true);
+    assertTrue(attributeDef.isAssignToGroup());
+    assertTrue(attributeDef.isAssignToStem());
+
+    //same again is no change, and reports the stored flags
+    wsAttributeDefSaveResults = GrouperServiceLogic.attributeDefSave(GROUPER_VERSION,
+        new WsAttributeDefToSave[] { wsAttributeDefToSave }, null, null, null);
+
+    assertEquals("SUCCESS_NO_CHANGES_NEEDED", wsAttributeDefSaveResults.getResults()[0].getResultMetadata().getResultCode());
+    assertEquals("T", wsAttributeDefSaveResults.getResults()[0].getWsAttributeDef().getAssignToGroup());
+
+    //find reports the stored flags
+    WsFindAttributeDefsResults wsFindAttributeDefsResults = GrouperServiceLogic.findAttributeDefs(
+        GROUPER_VERSION, "test1:attributeDefAssignTo", null, new WsAttributeDefLookup[] { new WsAttributeDefLookup("test1:attributeDefAssignTo", null) },
+        null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+    assertEquals(wsFindAttributeDefsResults.getResultMetadata().getResultMessage(),
+        WsFindAttributeDefsResultsCode.SUCCESS.name(),
+        wsFindAttributeDefsResults.getResultMetadata().getResultCode());
+    assertEquals(1, GrouperUtil.length(wsFindAttributeDefsResults.getAttributeDefResults()));
+    assertEquals("T", wsFindAttributeDefsResults.getAttributeDefResults()[0].getAssignToGroup());
+    assertEquals("T", wsFindAttributeDefsResults.getAttributeDefResults()[0].getAssignToStem());
+    assertEquals("F", wsFindAttributeDefsResults.getAttributeDefResults()[0].getAssignToMember());
+  }
+
+  /**
    * test save attribute defs
    */
   public void testAttributeDefSave() {
